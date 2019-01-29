@@ -1,0 +1,10 @@
+<h1>Article Editor</h1>
+<form action="/articles/{{title}}" method="PUT">
+  <label for="title">Title</label>
+  <input type="text" name="title" id="title" value="{{title}}">
+  <label for="author">Author</label>
+  <input type="text" name="author" id="author">
+  <label for="body">Body</label>
+  <textarea rows="8" columns="80" name="body" id="body"></textarea>
+  <input type="submit" value="Submit">
+</form>

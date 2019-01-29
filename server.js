@@ -1,8 +1,8 @@
 const express = require('express');
 const exphbs = require('express-handlebars');
 const bodyParser = require('body-parser');
-const productDB = require('./db/products');
-const articleDB = require('./db/articles');
+const productDB = require('./routes/products');
+const articleDB = require('./routes/articles');
 router = express.Router();
 
 const app = express();

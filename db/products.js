@@ -1,10 +1,16 @@
 (function () {
   const products = {
-    "products": []
+    "products": [
+      {
+        name: "Sham Wow",
+        price: 40,
+        inventory: 1000
+      }
+    ]
   };
 
   const getProducts = () => {
-    return articles.articles;
+    return products;
   };
 
   const addProduct = (name, price, inventory) => {
