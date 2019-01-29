@@ -34,15 +34,26 @@
   const editArticle = (data) => {
     let article = readArticle(data.title);
 
+    if (!article) {
+      return false;
+    }
+
     for (var key in data) {
       article[key] = data.key;
     }
+
+    return true;
   };
 
   const deleteArticle = (title) => {
     let article = readArticle(title);
 
+    if (!article) {
+      return false;
+    }
+
     articles.articles.splice(articles.articles.indexOf(article), 1);
+    return true;
   };
 
   module.exports = {
