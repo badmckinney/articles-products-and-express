@@ -12,6 +12,7 @@ app.engine('.hbs', exphbs({
   extname: '.hbs',
   defaultLayout: 'main.hbs'
 }));
+app.set('views', __dirname + '/views/templates');
 app.set('view engine', '.hbs');
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use('/products', productDB);
