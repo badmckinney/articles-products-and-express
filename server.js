@@ -1,6 +1,8 @@
 const express = require('express');
 const exphbs = require('express-handlebars');
 const bodyParser = require('body-parser');
+const productDB = require('./db/products');
+const articleDB = require('./db/articles');
 router = express.Router();
 
 const app = express();
@@ -12,6 +14,8 @@ app.engine('.hbs', exphbs({
 }));
 app.set('view engine', '.hbs');
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use('/products', productDB);
+app.use('/articles', articleDB);
 
 
 const server = app.listen(PORT, () => {
