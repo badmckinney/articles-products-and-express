@@ -1,5 +1,6 @@
 const express = require('express');
 const exphbs = require('express-handlebars');
+const methodOverride = require('method-override');
 const bodyParser = require('body-parser');
 const productDB = require('./routes/products');
 const articleDB = require('./routes/articles');
@@ -14,6 +15,7 @@ app.engine('.hbs', exphbs({
 }));
 app.set('views', __dirname + '/views/templates');
 app.set('view engine', '.hbs');
+app.use(methodOverride('_method'));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use('/products', productDB);
 app.use('/articles', articleDB);

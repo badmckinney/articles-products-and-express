@@ -1,10 +1,17 @@
 <h1>Add New Article</h1>
-<form action="/articles" method="POST">
+<form method="POST" action="/articles">
   <label for="title">Title</label>
+  </br>
   <input type="text" name="title" id="title">
+  </br>
   <label for="author">Author</label>
+  </br>
   <input type="text" name="author" id="author">
+  </br>
   <label for="body">Body</label>
-  <textarea rows="8" columns="80" name="body" id="body"></textarea>
+  </br>
+  <input name="body" id="body">
+  </br>
   <input type="submit" value="Submit">
 </form>
+<p>{{message}}</p>

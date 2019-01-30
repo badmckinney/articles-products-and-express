@@ -1,10 +1,16 @@
 (function () {
   const articles = {
-    "articles": []
+    "articles": [
+      {
+        title: "My Swedish-made Penis Enlarger and Me",
+        author: "Austin Powers",
+        body: "That's not mine",
+      }
+    ]
   };
 
   const getArticles = () => {
-    return articles.articles;
+    return articles;
   };
 
   const addArticle = (title, body, author) => {
@@ -16,11 +22,12 @@
     articles.articles.push(article);
   };
 
-  const readArticle = (title) => {
+  const findArticle = (title) => {
     let index = -1;
+    let formattedArg = title.split(' ').join('').toLowerCase();
 
     articles.articles.forEach(article => {
-      if (article.title === title) {
+      if (article.title.split(' ').join('').toLowerCase() === formattedArg) {
         return index = articles.articles.indexOf(article);
       }
     });
@@ -28,7 +35,7 @@
     if (index < 0) {
       return false;
     }
-    return articles.articles[index];
+    return index;
   };
 
   const editArticle = (data) => {
@@ -46,20 +53,20 @@
   };
 
   const deleteArticle = (title) => {
-    let article = readArticle(title);
+    let articleIndex = findArticle(title);
 
-    if (!article) {
+    if (typeof article !== 'number') {
       return false;
     }
 
-    articles.articles.splice(articles.articles.indexOf(article), 1);
+    articles.articles.splice(articles.articles.indexOf(articleIndex), 1);
     return true;
   };
 
   module.exports = {
     getArticles,
     addArticle,
-    readArticle,
+    findArticle,
     editArticle,
     deleteArticle
   };

@@ -7,9 +7,9 @@ router.get('/', (req, res) => {
   const products = productDB.getProducts();
   if (products.length < 1) {
     products.message = "No products in our database";
+  } else {
+    products.message = "";
   }
-
-  products.message = "";
 
   res.status(200);
   return res.render('./products/index', products);
@@ -67,10 +67,10 @@ router.post('/', (req, res) => {
   let added = productDB.addProduct(body.name, body.price, body.inventory);
 
   if (!added) {
-    res.render('./products/new', { message: "Please provide appropriate information to each field. Name should be a string, Price and Inventory should be numbers." });
+    return res.render('./products/new', { message: "Please provide appropriate information to each field. Name should be a string, Price and Inventory should be numbers." });
   }
 
-  return res.redirect('/');
+  return res.redirect('/products');
 });
 
 router.put('/:id', (req, res) => {
@@ -78,18 +78,18 @@ router.put('/:id', (req, res) => {
   const params = req.params
   const productIndex = productDB.findProduct(params.id);
 
-  if (!productIndex) {
+  if (typeof productIndex !== 'number') {
     let data = { message: "That product is not in our database, please add it as a new product" };
 
     return res.render('./products/new', data);
   }
 
-  for (var key in params) {
-    database[productIndex][key] = body.key;
+  for (var key in body) {
+    database[productIndex][key] = body[key];
   }
 
   res.status(200);
-  return res.redirect(`./products/${params.id}`);
+  return res.redirect(`./${params.id}`);
 });
 
 router.delete('/:id', (req, res) => {
