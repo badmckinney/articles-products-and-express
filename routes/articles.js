@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const articleDB = require('../db/articles.js');
+const middleware = require('../middleware/validate');
 const database = articleDB.getArticles().articles;
 
 router.get('/', (req, res) => {
@@ -20,14 +21,9 @@ router.get('/new', (req, res) => {
   return res.render('./articles/new', { message: "" });
 });
 
-router.get('/:title', (req, res) => {
+router.get('/:title', middleware.validator, (req, res) => {
   const params = req.params;
   const articleIndex = articleDB.findArticle(params.title);
-
-  if (typeof articleIndex !== 'number') {
-    res.status(500);
-    return res.json({ "Error": "Couldn't find that product in our database." });
-  }
 
   const data = {
     title: database[articleIndex].title,
@@ -39,14 +35,10 @@ router.get('/:title', (req, res) => {
   return res.render('./articles/article', data);
 });
 
-router.get('/:title/edit', (req, res) => {
+router.get('/:title/edit', middleware.validator, (req, res) => {
   let params = req.params;
   let articleIndex = articleDB.findArticle(params.title);
   let article = database[articleIndex];
-
-  if (typeof articleIndex !== 'number') {
-    return res.render('./article/new', { message: "That article is not in our database, please add it as a new article" });
-  }
 
   res.status(200);
   return res.render('./articles/edit', {
@@ -56,29 +48,18 @@ router.get('/:title/edit', (req, res) => {
   });
 });
 
-router.post('/', (req, res) => {
+router.post('/', middleware.validator, (req, res) => {
   const body = req.body;
-
-  if (body.length < 3) {
-    res.render('./products/new', { message: "Please fill out all fields with approppriate information" });
-  }
 
   articleDB.addArticle(body.title, body.author, body.body);
   return res.redirect('/articles');
 });
 
-router.put('/:title', (req, res) => {
-  debugger;
+router.put('/:title', middleware.validator, (req, res) => {
   const body = req.body;
   const params = req.params
   const formattedParam = params.title.split(' ').join('').toLowerCase();
   const articleIndex = articleDB.findArticle(params.title);
-
-  if (typeof articleIndex !== 'number') {
-    let data = { message: "That article is not in our database, please add it as a new article" };
-
-    return res.render('./articles/new', data);
-  }
 
   for (var key in body) {
     database[articleIndex][key] = body[key];
@@ -88,14 +69,14 @@ router.put('/:title', (req, res) => {
   return res.redirect(`./${formattedParam}`);
 });
 
-router.delete('/:title', (req, res) => {
+router.delete('/:title', middleware.validator, (req, res) => {
   const articleTitle = req.params.title;
   const articleIndex = articleDB.findArticle(articleTitle);
 
-  if (typeof articleIndex !== 'number') {
-    res.status(500);
-    return res.json({ "Error": "That product does not exist in our database." })
-  }
+  // if (typeof articleIndex !== 'number') {
+  //   res.status(500);
+  //   return res.json({ "Error": "That product does not exist in our database." })
+  // }
 
   database.splice(articleIndex, 1);
 

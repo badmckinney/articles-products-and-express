@@ -3,6 +3,7 @@ const express = require('express');
 const exphbs = require('express-handlebars');
 const methodOverride = require('method-override');
 const bodyParser = require('body-parser');
+const validator = require('./middleware/validate');
 const productDB = require('./routes/products');
 const articleDB = require('./routes/articles');
 router = express.Router();
@@ -32,17 +33,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use((req, res, next) => {
-  let route = req.url.slice(0, 10);
-  if (route === '/articles') {
-    if (req.headers.version !== '1.0') {
-      res.status(400);
-      res.json({ "error": "bad headers" });
-    }
-  }
-  next();
-});
-
+app.use(validator.validator);
 app.use('/products', productDB);
 app.use('/articles', articleDB);
 

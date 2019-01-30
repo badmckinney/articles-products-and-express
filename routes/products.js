@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const productDB = require('../db/products.js');
 const database = productDB.getProducts().products;
+const middleware = require('../middleware/validate');
 
 router.get('/', (req, res) => {
   const products = productDB.getProducts();
@@ -20,14 +21,9 @@ router.get('/new', (req, res) => {
   return res.render('./products/new', {});
 });
 
-router.get('/:id', (req, res) => {
+router.get('/:id', middleware.validator, (req, res) => {
   const params = req.params;
   const productIndex = productDB.findProduct(params.id);
-
-  if (typeof productIndex !== 'number') {
-    res.status(500);
-    return res.json({ "Error": "Couldn't find that product in our database." });
-  }
 
   const data = {
     name: database[productIndex].name,
@@ -39,14 +35,10 @@ router.get('/:id', (req, res) => {
   return res.render('./products/product', data);
 });
 
-router.get('/:id/edit', (req, res) => {
-  let params = req.params;
+router.get('/:id/edit', middleware.validator, (req, res) => {
+  let params = req.params
   let productIndex = productDB.findProduct(params.id);
   let product = database[productIndex];
-
-  if (typeof productIndex !== 'number') {
-    return res.render('./products/new', { message: "That product is not in our database, please add it as a new product" });
-  }
 
   res.status(200);
   return res.render('./products/edit', {
@@ -57,32 +49,17 @@ router.get('/:id/edit', (req, res) => {
   });
 });
 
-router.post('/', (req, res) => {
+router.post('/', middleware.validator, (req, res) => {
   const body = req.body;
 
-  if (body.length < 3) {
-    res.render('./products/new', { message: "Please fill out all fields with approppriate information" });
-  }
-
-  let added = productDB.addProduct(body.name, body.price, body.inventory);
-
-  if (!added) {
-    return res.render('./products/new', { message: "Please provide appropriate information to each field. Name should be a string, Price and Inventory should be numbers." });
-  }
-
+  productDB.addProduct(body.name, body.price, body.inventory);
   return res.redirect('/products');
 });
 
-router.put('/:id', (req, res) => {
+router.put('/:id', middleware.validator, (req, res) => {
   const body = req.body;
   const params = req.params
   const productIndex = productDB.findProduct(params.id);
-
-  if (typeof productIndex !== 'number') {
-    let data = { message: "That product is not in our database, please add it as a new product" };
-
-    return res.render('./products/new', data);
-  }
 
   for (var key in body) {
     database[productIndex][key] = body[key];
@@ -92,14 +69,9 @@ router.put('/:id', (req, res) => {
   return res.redirect(`./${params.id}`);
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', middleware.validator, (req, res) => {
   const productID = req.params.id;
   const productIndex = productDB.findProduct(productID);
-
-  if (typeof productIndex !== 'number') {
-    res.status(500);
-    return res.json({ "Error": "That product does not exist in our database." })
-  }
 
   database.splice(productIndex, 1);
 
