@@ -1,0 +1,6 @@
+
+GET /products Wed, 30 Jan 2019 01:26:23 GMT
+GET /products/1 Wed, 30 Jan 2019 01:26:56 GMT
+GET /products/1/edit Wed, 30 Jan 2019 01:27:00 GMT
+PUT /products/1?_method=PUT Wed, 30 Jan 2019 01:27:13 GMT
+GET /products/1 Wed, 30 Jan 2019 01:27:13 GMT
