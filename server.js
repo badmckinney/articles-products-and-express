@@ -18,6 +18,7 @@ app.set('views', __dirname + '/views/templates');
 app.set('view engine', '.hbs');
 app.use(methodOverride('_method'));
 app.use(bodyParser.urlencoded({ extended: false }));
+
 app.use((req, res, next) => {
   let now = new Date().toDateString();
   now = now.replace(/ /g, "_");
@@ -30,6 +31,18 @@ app.use((req, res, next) => {
   });
   next();
 });
+
+app.use((req, res, next) => {
+  let route = req.url.slice(0, 10);
+  if (route === '/articles') {
+    if (req.headers.version !== '1.0') {
+      res.status(400);
+      res.json({ "error": "bad headers" });
+    }
+  }
+  next();
+});
+
 app.use('/products', productDB);
 app.use('/articles', articleDB);
 
