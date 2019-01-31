@@ -1,0 +1,100 @@
+const express = require('express');
+const router = express.Router();
+const articleDB = require('../db/articles.js');
+const middleware = require('../middleware/validate');
+const database = articleDB.getArticles().articles;
+
+/************************
+ *  GET
+************************/
+
+router.get('/', (req, res) => {
+  const articles = articleDB.getArticles();
+  if (articles.length < 1) {
+    articles.message = "No products in our database";
+  } else {
+    articles.message = "";
+  }
+
+  res.status(200);
+  return res.render('./articles/index', articles);
+});
+
+router.get('/new', (req, res) => {
+  res.status(200);
+  return res.render('./articles/new', { message: "" });
+});
+
+router.get('/:title', middleware.validator, (req, res) => {
+  const params = req.params;
+  const articleIndex = articleDB.findArticle(params.title);
+
+  const data = {
+    title: database[articleIndex].title,
+    author: database[articleIndex].author,
+    body: database[articleIndex].body
+  }
+
+  res.status(200);
+  return res.render('./articles/article', data);
+});
+
+router.get('/:title/edit', middleware.validator, (req, res) => {
+  let params = req.params;
+  let articleIndex = articleDB.findArticle(params.title);
+  let article = database[articleIndex];
+
+  res.status(200);
+  return res.render('./articles/edit', {
+    title: article.title,
+    author: article.author,
+    body: article.body,
+  });
+});
+
+/************************
+ *  POST
+************************/
+
+router.post('/', middleware.validator, (req, res) => {
+  const body = req.body;
+
+  articleDB.addArticle(body.title, body.author, body.body);
+  return res.redirect('/articles');
+});
+
+/************************
+ *  PUT
+************************/
+
+router.put('/:title', middleware.validator, (req, res) => {
+  const body = req.body;
+  const params = req.params
+  const formattedParam = params.title.split(' ').join('').toLowerCase();
+  const articleIndex = articleDB.findArticle(params.title);
+
+  for (var key in body) {
+    database[articleIndex][key] = body[key];
+  }
+
+  res.status(200);
+  return res.redirect(`./${formattedParam}`);
+});
+
+/************************
+ *  DELETE
+************************/
+
+router.delete('/:title', middleware.validator, (req, res) => {
+  const articleTitle = req.params.title;
+  const articleIndex = articleDB.findArticle(articleTitle);
+
+  database.splice(articleIndex, 1);
+
+  const articles = articleDB.getArticles();
+  articles.message = "Deletion Successful";
+  res.status(200);
+  return res.render('./articles/index', articles);
+});
+
+module.exports = router;

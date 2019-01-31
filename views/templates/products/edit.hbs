@@ -1,0 +1,11 @@
+<h1>Product Editor</h1>
+<form method="POST" action="/products/{{id}}?_method=PUT">
+  <label for="name">Name</label>
+  <input type="text" name="name" id="name" value="{{name}}">
+  <label for="price">Price</label>
+  <input type="text" name="price" id="price" value="{{price}}">
+  <label for="inventory">Inventory</label>
+  <input name="inventory" id="inventory" value="{{inventory}}">
+  <input type="submit" value="Submit">
+</form>
+<p>{{message}}</p>
