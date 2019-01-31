@@ -4,6 +4,10 @@ const articleDB = require('../db/articles.js');
 const middleware = require('../middleware/validate');
 const database = articleDB.getArticles().articles;
 
+/************************
+ *  GET
+************************/
+
 router.get('/', (req, res) => {
   const articles = articleDB.getArticles();
   if (articles.length < 1) {
@@ -48,12 +52,20 @@ router.get('/:title/edit', middleware.validator, (req, res) => {
   });
 });
 
+/************************
+ *  POST
+************************/
+
 router.post('/', middleware.validator, (req, res) => {
   const body = req.body;
 
   articleDB.addArticle(body.title, body.author, body.body);
   return res.redirect('/articles');
 });
+
+/************************
+ *  PUT
+************************/
 
 router.put('/:title', middleware.validator, (req, res) => {
   const body = req.body;
@@ -69,14 +81,13 @@ router.put('/:title', middleware.validator, (req, res) => {
   return res.redirect(`./${formattedParam}`);
 });
 
+/************************
+ *  DELETE
+************************/
+
 router.delete('/:title', middleware.validator, (req, res) => {
   const articleTitle = req.params.title;
   const articleIndex = articleDB.findArticle(articleTitle);
-
-  // if (typeof articleIndex !== 'number') {
-  //   res.status(500);
-  //   return res.json({ "Error": "That product does not exist in our database." })
-  // }
 
   database.splice(articleIndex, 1);
 

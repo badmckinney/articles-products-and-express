@@ -34,7 +34,8 @@ module.exports = {
       // POST '/articles'
       if (req.method === 'POST' && req.url === '/articles') {
         let body = req.body;
-        if (body.length < 3) {
+
+        if (Object.keys(body).length < 3) {
           return res.render('./products/new', { message: "Please fill out all fields with approppriate information" });
         }
 
@@ -50,7 +51,8 @@ module.exports = {
       }
 
       // PUT '/:title'
-      if (req.method === "PUT" && req.url === `/${title}?_method=PUT`) {
+      if (req.method === "PUT" && req.url === `/${title}`) {
+        let body = req.body;
         const params = req.params
         const articleIndex = articleDB.findArticle(params.title);
 
@@ -129,11 +131,10 @@ module.exports = {
     }
 
     // PUT '/:id'
-    if (req.method === "PUT" && req.url === `/${id}?_method=PUT`) {
+    if (req.method === "PUT" && req.url === `/${id}`) {
       const body = req.body;
       const params = req.params
       const productIndex = productDB.findProduct(params.id);
-
       if (typeof productIndex !== 'number') {
         let data = { message: "That product is not in our database, please add it as a new product" };
 

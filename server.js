@@ -23,12 +23,11 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use((req, res, next) => {
   let now = new Date().toDateString();
   now = now.replace(/ /g, "_");
-  console.log(now);
   fs.appendFile(`./logs/${now}.log`, "\n" + `${req.method} ${req.url} ${new Date().toUTCString()}`, 'utf8', (err) => {
     if (err) {
       return console.log(err);
     }
-    return console.log('logged');
+    return true;
   });
   next();
 });
@@ -39,5 +38,8 @@ app.use('/articles', articleDB);
 
 
 const server = app.listen(PORT, () => {
-  console.log(`Server is running on PORT ${PORT}`);
+  //console.log(`Server is running on PORT ${PORT}`);
+  return true;
 });
+
+module.exports = server;

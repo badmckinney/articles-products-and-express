@@ -4,6 +4,10 @@ const productDB = require('../db/products.js');
 const database = productDB.getProducts().products;
 const middleware = require('../middleware/validate');
 
+/************************
+ *  GET
+************************/
+
 router.get('/', (req, res) => {
   const products = productDB.getProducts();
   if (products.length < 1) {
@@ -49,12 +53,20 @@ router.get('/:id/edit', middleware.validator, (req, res) => {
   });
 });
 
+/************************
+ * POST
+************************/
+
 router.post('/', middleware.validator, (req, res) => {
   const body = req.body;
 
   productDB.addProduct(body.name, body.price, body.inventory);
   return res.redirect('/products');
 });
+
+/************************
+ *  PUT
+************************/
 
 router.put('/:id', middleware.validator, (req, res) => {
   const body = req.body;
@@ -68,6 +80,10 @@ router.put('/:id', middleware.validator, (req, res) => {
   res.status(200);
   return res.redirect(`./${params.id}`);
 });
+
+/************************
+ *  DELETE
+************************/
 
 router.delete('/:id', middleware.validator, (req, res) => {
   const productID = req.params.id;
