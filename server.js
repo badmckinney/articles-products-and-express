@@ -4,9 +4,8 @@ const exphbs = require('express-handlebars');
 const methodOverride = require('method-override');
 const bodyParser = require('body-parser');
 const validator = require('./middleware/validate');
-const productDB = require('./routes/products');
-const articleDB = require('./routes/articles');
-router = express.Router();
+const productRouter = require('./routes/products');
+const articleRouter = require('./routes/articles');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -32,13 +31,11 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(validator.validator);
-app.use('/products', productDB);
-app.use('/articles', articleDB);
-
+app.use('/products', productRouter);
+app.use('/articles', articleRouter);
 
 const server = app.listen(PORT, () => {
-  //console.log(`Server is running on PORT ${PORT}`);
+  console.log(`Server is running on PORT ${PORT}`);
   return true;
 });
 

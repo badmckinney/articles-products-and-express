@@ -1,23 +1,27 @@
 const express = require('express');
 const router = express.Router();
-const articleDB = require('../db/articles.js');
 const middleware = require('../middleware/validate');
-const database = articleDB.getArticles().articles;
+const knex = require('../db');
 
 /************************
  *  GET
 ************************/
 
 router.get('/', (req, res) => {
-  const articles = articleDB.getArticles();
-  if (articles.length < 1) {
-    articles.message = "No products in our database";
-  } else {
-    articles.message = "";
-  }
+  const articles = knex('articles');
+  articles.then((list) => {
+    const data = {};
+    data.articles = list;
 
-  res.status(200);
-  return res.render('./articles/index', articles);
+    if (list.length < 1) {
+      data.message = "No products in our database";
+    } else {
+      data.message = "";
+    }
+
+    res.status(200);
+    return res.render('./articles/index', data);
+  });
 });
 
 router.get('/new', (req, res) => {
@@ -26,29 +30,30 @@ router.get('/new', (req, res) => {
 });
 
 router.get('/:title', middleware.validator, (req, res) => {
-  const params = req.params;
-  const articleIndex = articleDB.findArticle(params.title);
+  const title = req.params.title;
+  const article = knex('articles').where({ title: `${title}` });
+  article.then((item) => {
+    const data = {
+      title: item[0].title,
+      author: item[0].author,
+      body: item[0].body
+    }
 
-  const data = {
-    title: database[articleIndex].title,
-    author: database[articleIndex].author,
-    body: database[articleIndex].body
-  }
-
-  res.status(200);
-  return res.render('./articles/article', data);
+    res.status(200);
+    return res.render('./articles/article', data);
+  }).catch(console.log);
 });
 
 router.get('/:title/edit', middleware.validator, (req, res) => {
-  let params = req.params;
-  let articleIndex = articleDB.findArticle(params.title);
-  let article = database[articleIndex];
-
-  res.status(200);
-  return res.render('./articles/edit', {
-    title: article.title,
-    author: article.author,
-    body: article.body,
+  let title = req.params.title;
+  const article = knex('articles').where({ title: `${title}` });
+  article.then((item) => {
+    res.status(200);
+    return res.render('./articles/edit', {
+      title: item[0].title,
+      author: item[0].author,
+      body: item[0].body,
+    });
   });
 });
 
@@ -59,8 +64,10 @@ router.get('/:title/edit', middleware.validator, (req, res) => {
 router.post('/', middleware.validator, (req, res) => {
   const body = req.body;
 
-  articleDB.addArticle(body.title, body.author, body.body);
-  return res.redirect('/articles');
+  knex('articles').insert({ title: body.title, author: body.author, body: body.body })
+    .then(() => {
+      return res.redirect('/articles');
+    });
 });
 
 /************************
@@ -68,17 +75,21 @@ router.post('/', middleware.validator, (req, res) => {
 ************************/
 
 router.put('/:title', middleware.validator, (req, res) => {
+  console.log(req.url);
   const body = req.body;
-  const params = req.params
-  const formattedParam = params.title.split(' ').join('').toLowerCase();
-  const articleIndex = articleDB.findArticle(params.title);
+  const title = encodeURIComponent(req.body.title);
 
-  for (var key in body) {
-    database[articleIndex][key] = body[key];
-  }
-
-  res.status(200);
-  return res.redirect(`./${formattedParam}`);
+  knex('articles')
+    .where({ title: req.params.title })
+    .update({
+      title: body.title,
+      author: body.author,
+      body: body.body
+    })
+    .then(() => {
+      res.status(200);
+      return res.redirect(`./${title}`);
+    });
 });
 
 /************************
@@ -86,15 +97,22 @@ router.put('/:title', middleware.validator, (req, res) => {
 ************************/
 
 router.delete('/:title', middleware.validator, (req, res) => {
-  const articleTitle = req.params.title;
-  const articleIndex = articleDB.findArticle(articleTitle);
+  const title = decodeURIComponent(req.params.title);
 
-  database.splice(articleIndex, 1);
+  knex('articles')
+    .where({ title: title })
+    .del()
+    .then(() => {
+      const articles = knex('articles');
 
-  const articles = articleDB.getArticles();
-  articles.message = "Deletion Successful";
-  res.status(200);
-  return res.render('./articles/index', articles);
+      articles.then((list) => {
+        const data = {};
+        data.articles = list;
+        articles.message = "Deletion Successful";
+        res.status(200);
+        return res.render('./articles/index', data);
+      });
+    });
 });
 
 module.exports = router;

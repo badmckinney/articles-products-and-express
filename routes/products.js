@@ -1,23 +1,27 @@
 const express = require('express');
 const router = express.Router();
-const productDB = require('../db/products.js');
-const database = productDB.getProducts().products;
 const middleware = require('../middleware/validate');
+const knex = require('../db');
 
 /************************
  *  GET
 ************************/
 
 router.get('/', (req, res) => {
-  const products = productDB.getProducts();
-  if (products.length < 1) {
-    products.message = "No products in our database";
-  } else {
-    products.message = "";
-  }
+  const products = knex('products');
+  products.then((list) => {
+    const data = {};
+    data.products = list;
 
-  res.status(200);
-  return res.render('./products/index', products);
+    if (list.length < 1) {
+      data.message = "No products in our database";
+    } else {
+      data.message = "";
+    }
+
+    res.status(200);
+    return res.render('./products/index', data);
+  });
 });
 
 router.get('/new', (req, res) => {
@@ -26,31 +30,36 @@ router.get('/new', (req, res) => {
 });
 
 router.get('/:id', middleware.validator, (req, res) => {
-  const params = req.params;
-  const productIndex = productDB.findProduct(params.id);
+  let id = req.params.id;
 
-  const data = {
-    name: database[productIndex].name,
-    price: database[productIndex].price,
-    inventory: database[productIndex].inventory
-  }
+  knex('products').where({ id: id })
+    .then((product) => {
+      const data = {
+        id: id,
+        name: product[0].name,
+        price: product[0].price,
+        inventory: product[0].inventory
+      }
 
-  res.status(200);
-  return res.render('./products/product', data);
+      res.status(200);
+      return res.render('./products/product', data);
+    });
 });
 
 router.get('/:id/edit', middleware.validator, (req, res) => {
-  let params = req.params
-  let productIndex = productDB.findProduct(params.id);
-  let product = database[productIndex];
+  let id = req.params.id;
 
-  res.status(200);
-  return res.render('./products/edit', {
-    id: params.id,
-    name: product.name,
-    price: product.price,
-    inventory: product.inventory
-  });
+  knex('products').where({ id: id })
+    .then((product) => {
+
+      res.status(200);
+      return res.render('./products/edit', {
+        id: product[0].id,
+        name: product[0].name,
+        price: product[0].price,
+        inventory: product[0].inventory
+      });
+    });
 });
 
 /************************
@@ -60,8 +69,10 @@ router.get('/:id/edit', middleware.validator, (req, res) => {
 router.post('/', middleware.validator, (req, res) => {
   const body = req.body;
 
-  productDB.addProduct(body.name, body.price, body.inventory);
-  return res.redirect('/products');
+  knex('products').insert({ name: body.name, price: body.price, inventory: body.inventory })
+    .then(() => {
+      return res.redirect('/products');
+    });
 });
 
 /************************
@@ -70,31 +81,41 @@ router.post('/', middleware.validator, (req, res) => {
 
 router.put('/:id', middleware.validator, (req, res) => {
   const body = req.body;
-  const params = req.params
-  const productIndex = productDB.findProduct(params.id);
+  const id = req.params.id;
 
-  for (var key in body) {
-    database[productIndex][key] = body[key];
-  }
-
-  res.status(200);
-  return res.redirect(`./${params.id}`);
+  knex('products')
+    .where({ id: id })
+    .update({
+      name: body.name,
+      price: body.price,
+      inventory: body.inventory
+    })
+    .then(() => {
+      res.status(200);
+      return res.redirect(`./${id}`);
+    });
 });
 
-/************************
- *  DELETE
-************************/
+// /************************
+//  *  DELETE
+// ************************/
 
 router.delete('/:id', middleware.validator, (req, res) => {
-  const productID = req.params.id;
-  const productIndex = productDB.findProduct(productID);
+  const id = req.params.id
 
-  database.splice(productIndex, 1);
-
-  const products = productDB.getProducts();
-  products.message = "Deletion Successful";
-  res.status(200);
-  return res.render('./products/index', products);
+  knex('products')
+    .where({ id: id })
+    .del()
+    .then(() => {
+      knex('products')
+        .then((list) => {
+          const data = {};
+          data.products = list;
+          data.message = "Deletion Successful";
+          res.status(200);
+          return res.render('./products/index', data);
+        });
+    });
 });
 
 module.exports = router;

@@ -1,3 +1,6 @@
+const knex = require('../db');
+knex('products')
+  .then(console.log);
 module.exports = {
   validator: function (req, res, next) {
 
@@ -5,34 +8,43 @@ module.exports = {
      *  ARTICLES
     ************************/
     if (req.originalUrl.slice(0, 9) === '/articles') {
-      const title = req.params.title;
-      const articleDB = require('../db/articles.js');
-      const database = articleDB.getArticles().articles;
+      const encodedTitle = encodeURIComponent(req.params.title);
+      const title = decodeURIComponent(req.params.title);
 
       // GET '/:title'
-      if (req.method === 'GET' && req.url === `/${title}`) {
-        const params = req.params;
-        const articleIndex = articleDB.findArticle(params.title);
-
-        if (typeof articleIndex !== 'number') {
-          res.status(500);
-          return res.json({ "Error": "Couldn't find that product in our database." });
-        }
+      if (req.method === 'GET' && req.url === `/${encodedTitle}`) {
+        return knex('articles').where({ title: title })
+          .then((item) => {
+            if (item.length < 1) {
+              res.status(500);
+              return res.json({ "Error": "Couldn't find that article in our database." });
+            }
+            return next();
+          })
+          .catch((err) => {
+            console.log(err);
+            next();
+          });
       }
 
       // GET '/:title/edit'
-      if (req.method === 'GET' && req.url === `/${title}/edit`) {
-        let params = req.params;
-        let articleIndex = articleDB.findArticle(params.title);
-        let article = database[articleIndex];
-
-        if (typeof articleIndex !== 'number') {
-          return res.render('./articles/new', { message: "That article is not in our database, please add it as a new article" });
-        }
+      if (req.method === 'GET' && req.url === `/${encodedTitle}/edit`) {
+        return knex('articles').where({ title: title })
+          .then((item) => {
+            if (item.length < 1) {
+              res.status(200);
+              return res.render('./articles/new', { message: "That article is not in our database, please add it as a new article" });
+            }
+            return next();
+          })
+          .catch((err) => {
+            console.log(err);
+            next();
+          });
       }
 
       // POST '/articles'
-      if (req.method === 'POST' && req.url === '/articles') {
+      if (req.method === 'POST' && req.url === '/') {
         let body = req.body;
 
         if (Object.keys(body).length < 3) {
@@ -48,42 +60,55 @@ module.exports = {
             return res.render('./products/new', { message: "Please fill out all fields with approppriate information" });
           }
         }
+
+        next();
       }
 
       // PUT '/:title'
-      if (req.method === "PUT" && req.url === `/${title}`) {
+
+      if (req.method === "PUT" && req.url === `/${encodedTitle}?_method=PUT`) {
         let body = req.body;
-        const params = req.params
-        const articleIndex = articleDB.findArticle(params.title);
 
-        if (typeof articleIndex !== 'number') {
-          let data = { message: "That article is not in our database, please add it as a new article" };
+        knex('articles').where({ title: title })
+          .then((item) => {
+            if (item.length < 1) {
+              res.status(500);
+              return res.json({ "Error": "Couldn't find that article in our database." });
+            }
 
-          return res.render('./articles/new', data);
-        }
+            for (var key in body) {
+              if (body[key].length < 2 || !isNaN(parseInt(body[key]))) {
+                return res.render(`./articles/edit`, {
+                  title: item.title,
+                  author: item.price,
+                  body: item.body,
+                  message: "Please fill out all fields with approppriate information"
+                });
+              }
+            }
 
-        for (var key in body) {
-          if (body[key].length < 2 || !isNaN(parseInt(body[key]))) {
-            return res.render(`./products/edit`, {
-              id: params.id,
-              title: database[articleIndex].title,
-              author: database[articleIndex].price,
-              body: database[articleIndex].body,
-              message: "Please fill out all fields with approppriate information"
-            });
-          }
-        }
+            return next();
+          })
+          .catch((err) => {
+            console.log(err);
+            next();
+          });
       }
 
       // DELETE '/:title'
-      if (req.method === "DELETE" && req.url === `/${title}`) {
-        const articleTitle = req.params.title;
-        const articleIndex = articleDB.findArticle(articleTitle);
-
-        if (typeof articleIndex !== 'number') {
-          res.status(500);
-          return res.json({ "Error": "That product does not exist in our database." })
-        }
+      if (req.method === "DELETE" && req.url === `/${encodedTitle}`) {
+        return knex('articles').where({ title: title })
+          .then((item) => {
+            if (item.length < 1) {
+              res.status(500);
+              return res.json({ "Error": "Couldn't find that article in our database." });
+            }
+            return next();
+          })
+          .catch((err) => {
+            console.log(err);
+            next();
+          });
       }
     }
 
@@ -92,33 +117,41 @@ module.exports = {
     *  PRODUCTS
     ************************/
     const id = req.params.id;
-    const productDB = require('../db/products.js');
-    const database = productDB.getProducts().products;
 
     // GET '/:id'
     if (req.method === 'GET' && req.url === `/${id}`) {
-      const params = req.params;
-      const productIndex = productDB.findProduct(params.id);
-
-      if (typeof productIndex !== 'number') {
-        res.status(500);
-        return res.json({ "Error": "Couldn't find that product in our database." });
-      }
+      return knex('products').where({ id: id })
+        .then((product) => {
+          if (product.length < 1) {
+            res.status(500);
+            return res.json({ "Error": "Couldn't find that product in our database." });
+          }
+          return next();
+        })
+        .catch((err) => {
+          console.log(err);
+          next();
+        });
     }
 
     // GET '/:id/edit'
     if (req.method === "GET" && req.url === `/${id}/edit`) {
-      let params = req.params;
-      let productIndex = productDB.findProduct(params.id);
-      let product = database[productIndex];
-
-      if (typeof productIndex !== 'number') {
-        return res.render('./products/new', { message: "That product is not in our database, please add it as a new product" });
-      }
+      return knex('products').where({ id: id })
+        .then((product) => {
+          if (product.length < 1) {
+            res.status(500);
+            return res.json({ "Error": "Couldn't find that product in our database." });
+          }
+          return next();
+        })
+        .catch((err) => {
+          console.log(err);
+          next();
+        });
     }
 
     // POST '/'
-    if (req.method === "POST" && req.url === '/products') {
+    if (req.method === "POST" && req.url === '/') {
       const body = req.body;
 
       if (body.length < 3) {
@@ -128,41 +161,51 @@ module.exports = {
       if (!isNaN(parseInt(body.name)) || isNaN(parseInt(body.price)) || isNaN(parseInt(body.inventory))) {
         return res.render('./products/new', { message: "Please provide appropriate information to each field. Name should be a string, Price and Inventory should be numbers." });
       }
+
+      next();
     }
 
     // PUT '/:id'
-    if (req.method === "PUT" && req.url === `/${id}`) {
-      const body = req.body;
-      const params = req.params
-      const productIndex = productDB.findProduct(params.id);
-      if (typeof productIndex !== 'number') {
-        let data = { message: "That product is not in our database, please add it as a new product" };
+    if (req.method === "PUT" && req.url === `/${id}?_method=PUT`) {
+      let id = req.params.id;
+      let body = req.body;
 
-        return res.render('./products/new', data);
-      }
+      knex('products')
+        .where({ id: id })
+        .then((product) => {
+          if (product.length < 1) {
+            let data = { message: "That product is not in our database, please add it as a new product" };
+            return res.render('./products/new', data);
+          }
 
-      if (!isNaN(parseInt(body.name)) || isNaN(parseInt(body.price)) || isNaN(parseInt(body.inventory))) {
-        return res.render(`./products/edit`, {
-          id: params.id,
-          name: database[productIndex].name,
-          price: database[productIndex].price,
-          inventory: database[productIndex].inventory,
-          message: "Please provide appropriate information to each field. Name should be a string, Price and Inventory should be numbers."
+          if (!isNaN(parseInt(body.name)) || isNaN(parseInt(body.price)) || isNaN(parseInt(body.inventory))) {
+            return res.render(`./products/edit`, {
+              id: params.id,
+              name: product[0].name,
+              price: product[0].price,
+              inventory: product[0].inventory,
+              message: "Please provide appropriate information to each field. Name should be a string, Price and Inventory should be numbers."
+            });
+          }
         });
-      }
+
+      next();
     }
 
     // DELETE '/:id'
     if (req.method === 'DELETE' && req.url === `/${id}`) {
-      const productID = req.params.id;
-      const productIndex = productDB.findProduct(productID);
-
-      if (typeof productIndex !== 'number') {
-        res.status(500);
-        return res.json({ "Error": "That product does not exist in our database." })
-      }
+      return knex('products').where({ id: id })
+        .then((product) => {
+          if (product.length < 1) {
+            res.status(500);
+            return res.json({ "Error": "Couldn't find that product in our database." });
+          }
+          return next();
+        })
+        .catch((err) => {
+          console.log(err);
+          next();
+        });
     }
-
-    next();
   }
 }
