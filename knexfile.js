@@ -3,12 +3,9 @@
 module.exports = {
 
   development: {
-    client: 'pg',
+    client: 'sqlite3',
     connection: {
-      host: 'localhost',
-      user: 'badmckinney',
-      password: 'password',
-      database: 'articles_and_products'
+      filename: './dev.sqlite3'
     }
   },
 
@@ -16,7 +13,7 @@ module.exports = {
     client: 'postgresql',
     connection: {
       database: 'my_db',
-      user: 'username',
+      user:     'username',
       password: 'password'
     },
     pool: {
@@ -32,7 +29,7 @@ module.exports = {
     client: 'postgresql',
     connection: {
       database: 'my_db',
-      user: 'username',
+      user:     'username',
       password: 'password'
     },
     pool: {
