@@ -1,0 +1,17 @@
+
+GET /products/1/edit Mon, 04 Feb 2019 07:36:22 GMT
+PUT /products/1?_method=PUT Mon, 04 Feb 2019 07:36:48 GMT
+PUT /products/1?_method=PUT Mon, 04 Feb 2019 07:37:48 GMT
+PUT /products/1?_method=PUT Mon, 04 Feb 2019 07:38:26 GMT
+GET /products/1 Mon, 04 Feb 2019 07:38:26 GMT
+PUT /products/1?_method=PUT Mon, 04 Feb 2019 07:39:41 GMT
+GET /products/1 Mon, 04 Feb 2019 07:39:41 GMT
+GET /products/1/edit Mon, 04 Feb 2019 07:40:09 GMT
+PUT /products/1?_method=PUT Mon, 04 Feb 2019 07:40:13 GMT
+GET /products/1 Mon, 04 Feb 2019 07:40:13 GMT
+DELETE /products/2 Mon, 04 Feb 2019 07:44:53 GMT
+GET /products/new Mon, 04 Feb 2019 07:45:49 GMT
+POST /products Mon, 04 Feb 2019 07:45:55 GMT
+GET /products Mon, 04 Feb 2019 07:45:55 GMT
+DELETE /products/2 Mon, 04 Feb 2019 07:46:01 GMT
+DELETE /products/3 Mon, 04 Feb 2019 07:46:22 GMT

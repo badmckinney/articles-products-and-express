@@ -1,0 +1,16 @@
+<h1>Article Editor</h1>
+<form method="POST" action="/articles/{{title}}?_method=PUT">
+  <label for="title">Title</label>
+  </br>
+  <input type="text" name="title" id="title" value="{{title}}">
+  </br>
+  <label for="author">Author</label>
+  </br>
+  <input type="text" name="author" id="author" value="{{author}}">
+  </br>
+  <label for="body">Body</label>
+  </br>
+  <input name="body" id="body" value="{{body}}">
+  </br>
+  <input type="submit" value="Submit">
+</form>
